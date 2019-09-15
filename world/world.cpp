@@ -11,9 +11,9 @@ void VoxotWorld::_init() {
 	Godot::print("hello world");
 #endif
 	resources = ResourceLoader::get_singleton();
-	CreateChunk("scenes/Chunk.tscn", 2, 0);
-	CreateChunk("scenes/Chunk.tscn", 0, 1);
-	CreateChunk("scenes/Chunk.tscn", -2, 2);
+	CreateChunk("scenes/Chunk.tscn", 0, 0);
+	CreateChunk("scenes/Chunk.tscn", ChunkWidth, 0);
+	CreateChunk("scenes/Chunk.tscn", ChunkWidth * 2, 0);
 	int count = get_child_count();
 	for (int i = 0; i < count; i++) {
 		Node *temp = get_child(i);
