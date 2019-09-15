@@ -1,6 +1,8 @@
 #ifndef _VOXOT_H_
 #define _VOXOT_H_
 
+#include <string>
+
 #include <Godot.hpp>
 #include <MeshInstance.hpp>
 #include <PackedScene.hpp>

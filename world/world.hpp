@@ -2,42 +2,47 @@
 #define _WORLD_H_
 
 #include "../voxot.hpp"
-#include <string>
 
 using namespace godot;
 
 class Chunk;
 
 class VoxotWorld : public Spatial {
-  GODOT_CLASS(VoxotWorld, Spatial);
+	GODOT_CLASS(VoxotWorld, Spatial);
 
 public:
-  String _name;
+	String _name;
 
-  static void _register_methods();
-  void _init();
-  void _process(float);
+	static void _register_methods();
+	void _init();
+	void _process(float);
 
-  void setChunkWidth(int);
-  int getChunkWidth();
+	virtual void Init();
+	virtual void Generate();
+	virtual void Update();
 
-  void setChunkHeight(int);
-  int getChunkHeight();
+	void setChunkWidth(int);
+	int getChunkWidth();
 
-  void setChunkDepth(int);
-  int getChunkDepth();
+	void setChunkHeight(int);
+	int getChunkHeight();
 
-  void CreateChunk(String, int, int);
+	void setChunkDepth(int);
+	int getChunkDepth();
+
+	void CreateChunk(String, int, int);
 
 protected:
-  int ChunkWidth;
-  int ChunkHeight;
-  int ChunkDepth;
+	int ChunkWidth;
+	int ChunkHeight;
+	int ChunkDepth;
 
-  int WorldWidth;
-  int WorldHeight;
+	int WorldWidth;
+	int WorldHeight;
 
-  ResourceLoader *resources;
+	ResourceLoader *resources;
+
+	bool isInit;
 };
 
 #endif

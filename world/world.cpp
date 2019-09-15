@@ -4,23 +4,17 @@ void VoxotWorld::_register_methods() {
 	register_property<VoxotWorld, int>("Chunk/Width", &VoxotWorld::setChunkWidth, &VoxotWorld::getChunkWidth, 12);
 	register_property<VoxotWorld, int>("Chunk/Height", &VoxotWorld::setChunkHeight, &VoxotWorld::getChunkHeight, 12);
 	register_property<VoxotWorld, int>("Chunk/Depth", &VoxotWorld::setChunkDepth, &VoxotWorld::getChunkDepth, 12);
+
+	register_method("_process", &VoxotWorld::_process);
 }
 
 void VoxotWorld::_init() {
-#ifdef DEBUG
-	Godot::print("hello world");
-#endif
+	isInit = false;
+	ChunkWidth = 12;
+	ChunkHeight = 12;
+	ChunkDepth = 12;
+
 	resources = ResourceLoader::get_singleton();
-	CreateChunk("scenes/Chunk.tscn", 0, 0);
-	CreateChunk("scenes/Chunk.tscn", ChunkWidth, 0);
-	CreateChunk("scenes/Chunk.tscn", ChunkWidth * 2, 0);
-	int count = get_child_count();
-	for (int i = 0; i < count; i++) {
-		Node *temp = get_child(i);
-	}
-#ifdef DEBUG
-	Godot::print("world made");
-#endif
 }
 
 void VoxotWorld::CreateChunk(String path, int x, int y) {
@@ -33,12 +27,38 @@ void VoxotWorld::CreateChunk(String path, int x, int y) {
 		} else
 			return;
 	}
-	std::string out = std::to_string(x) + std::to_string(y);
-	newChunk->set_name(String(out.c_str()));
 	this->add_child(newChunk);
 }
 
+void VoxotWorld::Generate() {
+	CreateChunk("scenes/Chunk.tscn", 0, 0);
+	CreateChunk("scenes/Chunk.tscn", ChunkWidth, 0);
+	CreateChunk("scenes/Chunk.tscn", ChunkWidth * 2, 0);
+	CreateChunk("scenes/Chunk.tscn", 0, ChunkDepth);
+	CreateChunk("scenes/Chunk.tscn", ChunkWidth, ChunkDepth);
+	CreateChunk("scenes/Chunk.tscn", ChunkWidth * 2, ChunkDepth);
+#ifdef DEBUG
+	int count = get_child_count();
+	for (int i = 0; i < count; i++) {
+		Node *temp = get_child(i);
+		Godot::print("Chunk: " + temp->get_name());
+	}
+	Godot::print("world made");
+#endif
+}
+
 void VoxotWorld::_process(float delta) {
+	if (!isInit) {
+		isInit = true;
+		Generate();
+	}
+	Update();
+}
+
+void VoxotWorld::Init() {
+}
+
+void VoxotWorld::Update() {
 }
 
 void VoxotWorld::setChunkWidth(int w) {
