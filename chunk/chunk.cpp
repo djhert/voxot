@@ -46,6 +46,5 @@ void Chunk::_process(float delta) {
 }
 
 void Chunk::_render() {
-
 	//set_mesh(sf->commit());
 }

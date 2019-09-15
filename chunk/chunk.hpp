@@ -4,7 +4,6 @@
 #include "../voxot.hpp"
 #include <ArrayMesh.hpp>
 #include <Mesh.hpp>
-#include <SurfaceTool.hpp>
 
 using namespace godot;
 
