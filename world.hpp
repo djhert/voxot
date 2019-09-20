@@ -1,14 +1,18 @@
 #ifndef _WORLD_H_
 #define _WORLD_H_
 
-#include "../voxot.hpp"
+#include "chunk.hpp"
+#include "voxot.hpp"
 
 using namespace godot;
 
-class Chunk;
+namespace Voxot {
 
-class VoxotWorld : public Spatial {
-	GODOT_CLASS(VoxotWorld, Spatial);
+class Chunk;
+//class Block;
+
+class World : public Spatial {
+	GODOT_CLASS(World, Spatial);
 
 public:
 	String _name;
@@ -44,5 +48,6 @@ protected:
 
 	bool isInit;
 };
+} // namespace Voxot
 
 #endif

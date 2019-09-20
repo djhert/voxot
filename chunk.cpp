@@ -1,5 +1,6 @@
 #include "chunk.hpp"
 
+namespace Voxot {
 Chunk::Chunk() {}
 Chunk::~Chunk() {
 	for (int x = 0; x < width; x++) {
@@ -33,7 +34,7 @@ void Chunk::_register_methods() {
 void Chunk::_init() {
 }
 
-void Chunk::setup(VoxotWorld *w, int posx, int posy) {
+void Chunk::setup(World *w, int posx, int posy) {
 #ifdef DEBUG
 	Godot::print("Chunk setup");
 #endif
@@ -49,15 +50,17 @@ void Chunk::setup(VoxotWorld *w, int posx, int posy) {
 	set_transform(t);
 	set_name(toName(x, y));
 
-	Blocks = new Block **[width];
+	Blocks = new int **[width];
 	for (int x = 0; x < width; x++) {
-		Blocks[x] = new Block *[height];
+		Blocks[x] = new int *[height];
 		for (int y = 0; y < height; y++) {
-			Blocks[x][y] = new Block[depth];
+			Blocks[x][y] = new int[depth];
 		}
 	}
+	isDirty = false;
 	Generate();
-	Build();
+	Render();
+	//	Build();
 }
 
 void Chunk::_process(float delta) {
@@ -73,14 +76,47 @@ void Chunk::Init() {
 }
 
 void Chunk::Generate() {
+	for (int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
+			for (int z = 0; z < depth; z++) {
+				if (y % 2 == 0) {
+					Blocks[x][y][z] = 0;
+					continue;
+				}
+				Blocks[x][y][z] = 1;
+			}
+		}
+	}
 }
 
 void Chunk::Build() {
 }
 
 void Chunk::Render() {
-	//set_mesh(sf->commit());
+	PoolVector3Array data = PoolVector3Array();
+	ArrayMesh *mesh = ArrayMesh::_new();
+
+	Array array = Array();
+
+	for (int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
+			for (int z = 0; z < depth; z++) {
+				BlockBin::Get(Blocks[x][y][z])->Draw(this, &data, x, y, z);
+			}
+		}
+	}
+
+	array.resize(ArrayMesh::ARRAY_MAX);
+	array[ArrayMesh::ARRAY_VERTEX] = data;
+
+#ifdef DEBUG
+	Godot::print("Dataset Size: " + Chunk::toName(0, data.size()));
+#endif
+
+	mesh->add_surface_from_arrays(Mesh::PRIMITIVE_TRIANGLES, array);
+	set_mesh(mesh);
 }
 
 void Chunk::Update() {
 }
+} // namespace Voxot

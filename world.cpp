@@ -1,14 +1,15 @@
 #include "world.hpp"
 
-void VoxotWorld::_register_methods() {
-	register_property<VoxotWorld, int>("Chunk/Width", &VoxotWorld::setChunkWidth, &VoxotWorld::getChunkWidth, 12);
-	register_property<VoxotWorld, int>("Chunk/Height", &VoxotWorld::setChunkHeight, &VoxotWorld::getChunkHeight, 12);
-	register_property<VoxotWorld, int>("Chunk/Depth", &VoxotWorld::setChunkDepth, &VoxotWorld::getChunkDepth, 12);
+namespace Voxot {
+void World::_register_methods() {
+	register_property<World, int>("Chunk/Width", &World::setChunkWidth, &World::getChunkWidth, 12);
+	register_property<World, int>("Chunk/Height", &World::setChunkHeight, &World::getChunkHeight, 12);
+	register_property<World, int>("Chunk/Depth", &World::setChunkDepth, &World::getChunkDepth, 12);
 
-	register_method("_process", &VoxotWorld::_process);
+	register_method("_process", &World::_process);
 }
 
-void VoxotWorld::_init() {
+void World::_init() {
 	isInit = false;
 	ChunkWidth = 12;
 	ChunkHeight = 12;
@@ -17,7 +18,7 @@ void VoxotWorld::_init() {
 	resources = ResourceLoader::get_singleton();
 }
 
-void VoxotWorld::CreateChunk(String path, int x, int y) {
+void World::CreateChunk(String path, int x, int y) {
 	Chunk *newChunk;
 	Ref<PackedScene> res = resources->load(path);
 	if (res.is_valid()) {
@@ -30,13 +31,15 @@ void VoxotWorld::CreateChunk(String path, int x, int y) {
 	this->add_child(newChunk);
 }
 
-void VoxotWorld::Generate() {
+void World::Generate() {
+	BlockBin::Register(0, new BlockAir());
+	BlockBin::Register(1, new BlockSolid());
+
 	CreateChunk("scenes/Chunk.tscn", 0, 0);
 	CreateChunk("scenes/Chunk.tscn", ChunkWidth, 0);
 	CreateChunk("scenes/Chunk.tscn", ChunkWidth * 2, 0);
 	CreateChunk("scenes/Chunk.tscn", 0, ChunkDepth);
 	CreateChunk("scenes/Chunk.tscn", ChunkWidth, ChunkDepth);
-	CreateChunk("scenes/Chunk.tscn", ChunkWidth * 2, ChunkDepth);
 #ifdef DEBUG
 	int count = get_child_count();
 	for (int i = 0; i < count; i++) {
@@ -47,7 +50,7 @@ void VoxotWorld::Generate() {
 #endif
 }
 
-void VoxotWorld::_process(float delta) {
+void World::_process(float delta) {
 	if (!isInit) {
 		isInit = true;
 		Generate();
@@ -55,32 +58,33 @@ void VoxotWorld::_process(float delta) {
 	Update();
 }
 
-void VoxotWorld::Init() {
+void World::Init() {
 }
 
-void VoxotWorld::Update() {
+void World::Update() {
 }
 
-void VoxotWorld::setChunkWidth(int w) {
+void World::setChunkWidth(int w) {
 	ChunkWidth = w;
 }
 
-int VoxotWorld::getChunkWidth() {
+int World::getChunkWidth() {
 	return ChunkWidth;
 }
 
-void VoxotWorld::setChunkHeight(int h) {
+void World::setChunkHeight(int h) {
 	ChunkHeight = h;
 }
 
-int VoxotWorld::getChunkHeight() {
+int World::getChunkHeight() {
 	return ChunkHeight;
 }
 
-void VoxotWorld::setChunkDepth(int d) {
+void World::setChunkDepth(int d) {
 	ChunkDepth = d;
 }
 
-int VoxotWorld::getChunkDepth() {
+int World::getChunkDepth() {
 	return ChunkDepth;
 };
+} // namespace Voxot

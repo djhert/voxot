@@ -1,15 +1,23 @@
 #ifndef _CHUNK_H_
 #define _CHUNK_H_
 
-#include "../voxot.hpp"
-#include <ArrayMesh.hpp>
-#include <Mesh.hpp>
-#include <SceneTree.hpp>
+//#include "../block/block.hpp"
+//#include "../block/types/blockair.hpp"
+#include "block.hpp"
+#include "blockair.hpp"
+#include "blockbin.hpp"
+#include "blocksolid.hpp"
+#include "voxot.hpp"
+#include "world.hpp"
 
 using namespace godot;
 
+namespace Voxot {
+
 class Block;
-class VoxotWorld;
+class BlockAir;
+class BlockSolid;
+class World;
 
 class Chunk : public MeshInstance {
 	GODOT_CLASS(Chunk, MeshInstance);
@@ -38,12 +46,12 @@ public:
 	void Render();
 	static String toName(int, int);
 
-	void setup(VoxotWorld *, int, int);
+	void setup(World *, int, int);
 
 	void dirty();
 
 protected:
-	Block ***Blocks;
+	int ***Blocks;
 
 	int width;
 	int height;
@@ -55,7 +63,7 @@ protected:
 	bool isDirty;
 
 private:
-	VoxotWorld *_world;
+	World *_world;
 };
-
+} // namespace Voxot
 #endif
