@@ -4,6 +4,12 @@ namespace Voxot {
 BlockAir::BlockAir() {}
 BlockAir::~BlockAir() {}
 
+//bool BlockAir::registered = BlockBin::Register("air", Create);
+
+BlockAir *BlockAir::Create() {
+	return new BlockAir();
+}
+
 bool BlockAir::isVisible() {
 	return false;
 }

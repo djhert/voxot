@@ -101,7 +101,7 @@ void Chunk::Render() {
 	for (int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
 			for (int z = 0; z < depth; z++) {
-				BlockBin::Get(Blocks[x][y][z])->Draw(this, &data, x, y, z);
+				((Block *)BlockBin::Get("air"))->Draw(this, &data, x, y, z);
 			}
 		}
 	}

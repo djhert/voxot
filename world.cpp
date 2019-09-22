@@ -15,6 +15,8 @@ void World::_init() {
 	ChunkHeight = 12;
 	ChunkDepth = 12;
 
+	bool registered = BlockBin::Register("air", BlockAir::Create);
+	BlockBin::Init();
 	resources = ResourceLoader::get_singleton();
 }
 
@@ -32,14 +34,14 @@ void World::CreateChunk(String path, int x, int y) {
 }
 
 void World::Generate() {
-	BlockBin::Register(0, new BlockAir());
-	BlockBin::Register(1, new BlockSolid());
+	//	BlockBin::Register(0, new BlockAir());
+	//	BlockBin::Register(1, new BlockSolid());
 
 	CreateChunk("scenes/Chunk.tscn", 0, 0);
-	CreateChunk("scenes/Chunk.tscn", ChunkWidth, 0);
-	CreateChunk("scenes/Chunk.tscn", ChunkWidth * 2, 0);
-	CreateChunk("scenes/Chunk.tscn", 0, ChunkDepth);
-	CreateChunk("scenes/Chunk.tscn", ChunkWidth, ChunkDepth);
+//	CreateChunk("scenes/Chunk.tscn", ChunkWidth, 0);
+//	CreateChunk("scenes/Chunk.tscn", ChunkWidth * 2, 0);
+//	CreateChunk("scenes/Chunk.tscn", 0, ChunkDepth);
+//	CreateChunk("scenes/Chunk.tscn", ChunkWidth, ChunkDepth);
 #ifdef DEBUG
 	int count = get_child_count();
 	for (int i = 0; i < count; i++) {

@@ -4,6 +4,7 @@
 #include "block.hpp"
 #include "blockbin.hpp"
 #include "voxot.hpp"
+#include <memory>
 
 using namespace godot;
 
@@ -19,6 +20,8 @@ public:
 	~BlockAir();
 
 	void Draw(Chunk *, PoolVector3Array *, int, int, int) override;
+
+	static BlockAir *Create();
 
 private:
 	static bool registered;

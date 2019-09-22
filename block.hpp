@@ -1,6 +1,7 @@
 #ifndef _BLOCK_H_
 #define _BLOCK_H_
 
+#include "vblock.hpp"
 #include "voxot.hpp"
 
 using namespace godot;
@@ -9,10 +10,10 @@ namespace Voxot {
 
 class Chunk;
 
-class Block {
+class Block : public VBlock {
 public:
-	virtual bool isVisible();
-	virtual bool isSolid();
+	bool isVisible() override;
+	bool isSolid() override;
 
 	Block() = default;
 	~Block() = default;
