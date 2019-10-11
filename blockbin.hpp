@@ -1,29 +1,31 @@
 #ifndef _BLOCKBIN_H_
 #define _BLOCKBIN_H_
-#include "block.hpp"
-#include "vblock.hpp"
-#include <functional>
-#include <map>
-#include <memory>
-#include <vector>
+
+#include <string>
+#include <unordered_map>
 
 namespace Voxot {
 
+class Block;
+
+typedef Block *(*instanceGen)();
+
 class BlockBin {
-	using _bbin = std::map<std::string, VBlock *>;
-	using _bvec = std::map<std::string, std::function<VBlock *()> >;
-
 public:
-	static bool Register(std::string, std::function<VBlock *()>);
+	static BlockBin &instance();
 
-	static bool Init();
-
-	static Block *Get(std::string);
+	Block *Get(const std::string &typeName);
+	void Init();
+	bool Register(const std::string &typeName,
+			const instanceGen &funcCreate);
 
 private:
-	static void add(std::string, VBlock *);
-	static _bbin _blocks;
-	static _bvec _storage;
+	BlockBin();
+	BlockBin(const BlockBin &);
+	~BlockBin();
+
+	std::unordered_map<std::string, instanceGen> generators;
+	std::unordered_map<std::string, Block *> objs;
 };
 
 } // namespace Voxot

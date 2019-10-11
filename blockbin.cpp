@@ -1,41 +1,34 @@
 #include "blockbin.hpp"
 
 namespace Voxot {
-
-BlockBin::_bbin BlockBin::_blocks = [] {
-	_bbin ret;
-	return ret;
-}();
-
-BlockBin::_bvec BlockBin::_storage = [] {
-	_bvec ret;
-	return ret;
-}();
-
-bool BlockBin::Register(std::string key, std::function<VBlock *()> fc) {
-	if (auto it = _storage.find(key); it == _storage.end()) {
-		_storage[key] = fc;
-		return true;
-	}
-	return false;
+BlockBin::BlockBin() {
 }
 
-bool BlockBin::Init() {
-	for (auto &fn : _storage) {
-		add(fn.first, (fn.second)());
-	}
-	return true;
+BlockBin::~BlockBin() {
 }
 
-void BlockBin::add(std::string key, VBlock *block) {
-	if (auto it = _blocks.find(key); it == _blocks.end())
-		_blocks[key] = block;
-}
-
-Block *BlockBin::Get(std::string key) {
-	if (auto it = _blocks.find(key); it != _blocks.end()) {
-		return (Block *)_blocks[key];
+Block *BlockBin::Get(const std::string &typeName) {
+	auto it = objs.find(typeName);
+	if (it != objs.end()) {
+		return it->second;
 	}
+
 	return nullptr;
+}
+
+bool BlockBin::Register(const std::string &typeName, const instanceGen &funcCreate) {
+	return generators.insert(std::make_pair(typeName, funcCreate)).second;
+}
+
+void BlockBin::Init() {
+	for (auto const &x : generators) {
+		objs.insert(std::make_pair(x.first, x.second()));
+	}
+	generators.clear();
+}
+
+BlockBin &BlockBin::instance() {
+	static BlockBin instance;
+	return instance;
 }
 } // namespace Voxot

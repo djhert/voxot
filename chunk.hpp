@@ -1,12 +1,10 @@
 #ifndef _CHUNK_H_
 #define _CHUNK_H_
 
-//#include "../block/block.hpp"
-//#include "../block/types/blockair.hpp"
 #include "block.hpp"
-#include "blockair.hpp"
 #include "blockbin.hpp"
-#include "blocksolid.hpp"
+#include "meshdata.hpp"
+#include "metablock.hpp"
 #include "voxot.hpp"
 #include "world.hpp"
 
@@ -15,16 +13,15 @@ using namespace godot;
 namespace Voxot {
 
 class Block;
-class BlockAir;
-class BlockSolid;
 class World;
+class MeshData;
 
 class Chunk : public MeshInstance {
 	GODOT_CLASS(Chunk, MeshInstance);
 
 public:
 	// Constructor
-	Chunk();
+	Chunk(){};
 	// Destroyer
 	~Chunk();
 
@@ -34,36 +31,51 @@ public:
 	// Godot requirements
 	static void _register_methods();
 	void _init();
-	void _process(float);
+	void _ready();
+	void _process(double);
 
 	// Chunk functions
+	virtual void Init(){};
+	virtual void Ready(){};
+	virtual void Update(const double &){};
 	virtual void Generate();
-	virtual void Init();
-	virtual void Update();
 
-	// Voxot functions
-	void Build();
-	void Render();
-	static String toName(int, int);
+	static void Render(Chunk *);
+	static String toName(const int &, const int &, const int &);
 
-	void setup(World *, int, int);
+	void setup(World *, const int &, const int &, const int &);
+	Block *GetBlock(const int &, const int &, const int &);
+	bool DeleteBlock(const int &, const int &, const int &);
+	void dirty() { isDirty = true; };
 
-	void dirty();
+	template <typename T>
+	static T *New(World *w, const int &x, const int &y, const int &z) {
+		T *newChunk = T::_new();
+		newChunk->setup(w, x, y, z);
+		return newChunk;
+	}
+
+	int X;
+	int Y;
+	int Z;
+
+	int Width;
+	int Height;
+	int Depth;
+
+	static MetaBlock AirBlock;
 
 protected:
-	int ***Blocks;
-
-	int width;
-	int height;
-	int depth;
-
-	int x;
-	int y;
+	MetaBlock ***Blocks;
 
 	bool isDirty;
+	std::atomic<bool> isUpdating;
 
-private:
+	bool inBounds(const int &, const int &, const int &);
+
 	World *_world;
+	StaticBody *staticBody;
+	CollisionShape *collisionShape;
 };
 } // namespace Voxot
 #endif

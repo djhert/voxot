@@ -1,69 +1,65 @@
 #include "world.hpp"
 
 namespace Voxot {
+
+float World::tileSize;
+
+World::World() {}
+
+World::~World() {
+	MaterialList.clear();
+}
+
 void World::_register_methods() {
 	register_property<World, int>("Chunk/Width", &World::setChunkWidth, &World::getChunkWidth, 12);
 	register_property<World, int>("Chunk/Height", &World::setChunkHeight, &World::getChunkHeight, 12);
 	register_property<World, int>("Chunk/Depth", &World::setChunkDepth, &World::getChunkDepth, 12);
 
+	register_property<World, Dictionary>("Material/Materials", &World::MaterialList, Dictionary::make<String, Variant>("default", GODOT_VARIANT_TYPE_NIL));
+	register_property<World, int>("Material/Tiles", &World::settilesize, &World::gettilesize, 2);
+
+	register_method("_ready", &World::_ready);
 	register_method("_process", &World::_process);
 }
 
 void World::_init() {
-	isInit = false;
 	ChunkWidth = 12;
 	ChunkHeight = 12;
 	ChunkDepth = 12;
+	tiles = 2;
 
-	bool registered = BlockBin::Register("air", BlockAir::Create);
-	BlockBin::Init();
-	resources = ResourceLoader::get_singleton();
+	MaterialList = Dictionary::make<String, Variant>("default", GODOT_VARIANT_TYPE_NIL);
+
+	BlockBin::instance().Init();
+
+	Init();
 }
 
-void World::CreateChunk(String path, int x, int y) {
-	Chunk *newChunk;
-	Ref<PackedScene> res = resources->load(path);
-	if (res.is_valid()) {
-		newChunk = Object::cast_to<Chunk>(res->instance());
-		if (newChunk) {
-			newChunk->setup(this, x, y);
-		} else
-			return;
+void World::_ready() {
+	tileSize = 1.0f / tiles;
+	Generate();
+	Ready();
+}
+
+Ref<SpatialMaterial> World::GetMaterial(String name) {
+	if (!MaterialList.has(name)) {
+#ifdef DEBUG
+		Godot::print("Unable to find material " + name);
+#endif
+		return nullptr;
 	}
-	this->add_child(newChunk);
+	return MaterialList[name];
 }
 
 void World::Generate() {
-	//	BlockBin::Register(0, new BlockAir());
-	//	BlockBin::Register(1, new BlockSolid());
-
-	CreateChunk("scenes/Chunk.tscn", 0, 0);
-//	CreateChunk("scenes/Chunk.tscn", ChunkWidth, 0);
-//	CreateChunk("scenes/Chunk.tscn", ChunkWidth * 2, 0);
-//	CreateChunk("scenes/Chunk.tscn", 0, ChunkDepth);
-//	CreateChunk("scenes/Chunk.tscn", ChunkWidth, ChunkDepth);
-#ifdef DEBUG
-	int count = get_child_count();
-	for (int i = 0; i < count; i++) {
-		Node *temp = get_child(i);
-		Godot::print("Chunk: " + temp->get_name());
-	}
-	Godot::print("world made");
-#endif
+	this->add_child(Chunk::New<Chunk>(this, 0, 0, 0));
+	this->add_child(Chunk::New<Chunk>(this, ChunkWidth, 0, 0));
+	this->add_child(Chunk::New<Chunk>(this, 0, 0, ChunkDepth));
+	this->add_child(Chunk::New<Chunk>(this, ChunkWidth, 0, ChunkDepth));
 }
 
-void World::_process(float delta) {
-	if (!isInit) {
-		isInit = true;
-		Generate();
-	}
-	Update();
-}
-
-void World::Init() {
-}
-
-void World::Update() {
+void World::_process(double delta) {
+	Update(delta);
 }
 
 void World::setChunkWidth(int w) {
@@ -89,4 +85,56 @@ void World::setChunkDepth(int d) {
 int World::getChunkDepth() {
 	return ChunkDepth;
 };
+
+void World::settilesize(int t) {
+	tiles = t;
+}
+
+int World::gettilesize() {
+	return tiles;
+}
+
+bool World::AddBlock(const Vector3 &place, MetaBlock meta) {
+	int chunkX = floor(place.x / ChunkWidth) * ChunkWidth;
+	int chunkY = floor(place.y / ChunkHeight) * ChunkHeight;
+	int chunkZ = floor(place.z / ChunkDepth) * ChunkDepth;
+
+	Chunk *a = GetChunk(Chunk::toName(chunkX, chunkY, chunkZ));
+	if (!a)
+		return false;
+	int blockX = place.x - a->X;
+	int blockY = place.y - a->Y;
+	int blockZ = place.z - a->Z;
+	Godot::print("Add Block X: " + String::num(blockX) + " | Block Y: " + String::num(blockY) + " Block Z: " + String::num(blockZ));
+
+	return false;
+}
+
+bool World::DeleteBlock(const Vector3 &place) {
+	int chunkX = floor(place.x / ChunkWidth) * ChunkWidth;
+	int chunkY = floor(place.y / ChunkHeight) * ChunkHeight;
+	int chunkZ = floor(place.z / ChunkDepth) * ChunkDepth;
+
+	Chunk *a = GetChunk(Chunk::toName(chunkX, chunkY, chunkZ));
+	if (!a)
+		return false;
+	int blockX = place.x - a->X;
+	int blockY = place.y - a->Y;
+	int blockZ = place.z - a->Z;
+
+	return a->DeleteBlock(blockX, blockY, blockZ);
+}
+
+Chunk *World::GetChunk(const String &name) {
+	const NodePath &path = NodePath(name);
+	if (has_node(path)) {
+		return Node::cast_to<Chunk>(get_node(path));
+	}
+	return nullptr;
+}
+
+MetaBlock *GetBlock(const Vector3 &place) {
+	return new MetaBlock("air", 0);
+}
+
 } // namespace Voxot

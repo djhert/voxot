@@ -1,10 +1,10 @@
 #include "chunk.hpp"
 
 namespace Voxot {
-Chunk::Chunk() {}
+
 Chunk::~Chunk() {
-	for (int x = 0; x < width; x++) {
-		for (int y = 0; y < height; y++) {
+	for (int x = 0; x < Width; x++) {
+		for (int y = 0; y < Height; y++) {
 			delete[] Blocks[x][y];
 		}
 		delete[] Blocks[x];
@@ -12,111 +12,166 @@ Chunk::~Chunk() {
 	delete[] Blocks;
 }
 
-String Chunk::toName(int x, int y) {
+MetaBlock Chunk::AirBlock = { "air", 0 };
+
+String Chunk::toName(const int &x, const int &y, const int &z) {
 	std::string out;
-	if (x < 10)
+	if (std::abs(x) < 10)
 		out = "0" + std::to_string(x);
 	else
 		out = std::to_string(x);
 
-	if (y < 10)
+	if (std::abs(y) < 10)
 		out = out + "0" + std::to_string(y);
 	else
 		out = out + std::to_string(y);
+
+	if (std::abs(z) < 10)
+		out = out + "0" + std::to_string(z);
+	else
+		out = out + std::to_string(z);
 
 	return String(out.c_str());
 }
 
 void Chunk::_register_methods() {
+	register_method("_ready", &Chunk::_ready);
 	register_method("_process", &Chunk::_process);
 }
 
 void Chunk::_init() {
+	staticBody = StaticBody::_new();
+	collisionShape = CollisionShape::_new();
+	add_child(staticBody);
+	staticBody->add_child(collisionShape);
+	isDirty = false;
+	isUpdating = false;
+	Init();
 }
 
-void Chunk::setup(World *w, int posx, int posy) {
-#ifdef DEBUG
-	Godot::print("Chunk setup");
-#endif
+void Chunk::_ready() {
+	Ready();
+}
+
+void Chunk::setup(World *w, const int &posx, const int &posy, const int &posz) {
+
 	_world = w;
-	width = _world->getChunkWidth();
-	height = _world->getChunkHeight();
-	depth = _world->getChunkDepth();
-	x = posx;
-	y = posy;
-	Vector3 pos = Vector3(x, 0, y);
+	Width = _world->getChunkWidth();
+	Height = _world->getChunkHeight();
+	Depth = _world->getChunkDepth();
+
+	X = posx;
+	Y = posy;
+	Z = posz;
+
+	Vector3 pos = Vector3(X, Y, Z);
 	Transform t = get_transform();
 	t.origin = pos;
 	set_transform(t);
-	set_name(toName(x, y));
 
-	Blocks = new int **[width];
-	for (int x = 0; x < width; x++) {
-		Blocks[x] = new int *[height];
-		for (int y = 0; y < height; y++) {
-			Blocks[x][y] = new int[depth];
+	set_name(toName(X, Y, Z));
+	staticBody->set_name(get_name());
+	collisionShape->set_name(get_name());
+
+	Blocks = new MetaBlock **[Width];
+	for (int x = 0; x < Width; x++) {
+		Blocks[x] = new MetaBlock *[Height];
+		for (int y = 0; y < Height; y++) {
+			Blocks[x][y] = new MetaBlock[Depth];
 		}
 	}
-	isDirty = false;
+
 	Generate();
-	Render();
-	//	Build();
+	dirty();
 }
 
-void Chunk::_process(float delta) {
+void Chunk::_process(double delta) {
 	if (isDirty) {
-		Build();
-		Render();
-		isDirty = false;
+		if (!isUpdating) {
+			isUpdating = true;
+			isDirty = false;
+			Render(this);
+		}
 	}
-	Update();
-}
-
-void Chunk::Init() {
+	Update(delta);
 }
 
 void Chunk::Generate() {
-	for (int x = 0; x < width; x++) {
-		for (int y = 0; y < height; y++) {
-			for (int z = 0; z < depth; z++) {
-				if (y % 2 == 0) {
-					Blocks[x][y][z] = 0;
-					continue;
-				}
-				Blocks[x][y][z] = 1;
+	for (int x = 0; x < Width; x++) {
+		for (int y = 0; y < Height; y++) {
+			for (int z = 0; z < Depth; z++) {
+				Blocks[x][y][z] = { "solid", 0 };
 			}
 		}
 	}
 }
 
-void Chunk::Build() {
-}
-
-void Chunk::Render() {
-	PoolVector3Array data = PoolVector3Array();
+void Chunk::Render(Chunk *obj) {
+	MeshData *data = new MeshData();
 	ArrayMesh *mesh = ArrayMesh::_new();
+	ConcavePolygonShape *collisionMesh = ConcavePolygonShape::_new();
 
 	Array array = Array();
 
-	for (int x = 0; x < width; x++) {
-		for (int y = 0; y < height; y++) {
-			for (int z = 0; z < depth; z++) {
-				((Block *)BlockBin::Get("air"))->Draw(this, &data, x, y, z);
+	for (int x = 0; x < obj->Width; x++) {
+		for (int y = 0; y < obj->Height; y++) {
+			for (int z = 0; z < obj->Depth; z++) {
+				BlockBin::instance().Get(obj->Blocks[x][y][z].name.c_str())->Draw(obj, data, x, y, z);
 			}
 		}
 	}
 
 	array.resize(ArrayMesh::ARRAY_MAX);
-	array[ArrayMesh::ARRAY_VERTEX] = data;
-
-#ifdef DEBUG
-	Godot::print("Dataset Size: " + Chunk::toName(0, data.size()));
-#endif
+	array[ArrayMesh::ARRAY_VERTEX] = data->verts;
+	array[ArrayMesh::ARRAY_TEX_UV] = data->uvs;
+	array[ArrayMesh::ARRAY_NORMAL] = data->normals;
+	array[ArrayMesh::ARRAY_TANGENT] = data->tangents;
 
 	mesh->add_surface_from_arrays(Mesh::PRIMITIVE_TRIANGLES, array);
-	set_mesh(mesh);
+	obj->set_mesh(mesh);
+
+	Ref<SpatialMaterial> mat = obj->_world->GetMaterial("default");
+	if (!mat.is_valid()) {
+		Godot::print("material not good");
+	} else {
+		obj->set_surface_material(0, mat);
+	}
+	collisionMesh->set_faces(data->verts);
+	obj->collisionShape->set_shape(collisionMesh);
+
+	obj->isUpdating = false;
 }
 
-void Chunk::Update() {
+Block *Chunk::GetBlock(const int &x, const int &y, const int &z) {
+	if (inBounds(x, y, z))
+		return BlockBin::instance().Get(Blocks[x][y][z].name.c_str());
+	else
+		return BlockBin::instance().Get("air");
 }
+
+bool Chunk::DeleteBlock(const int &x, const int &y, const int &z) {
+	if (isUpdating.load()) {
+		return false;
+	}
+	if (inBounds(x, y, z)) {
+		if (Blocks[x][y][z] != AirBlock) {
+			dirty();
+			Blocks[x][y][z] = { "air", 0 };
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Chunk::inBounds(const int &x, const int &y, const int &z) {
+	if (x >= 0 && x < Width) {
+		if (y >= 0 && y < Height) {
+			if (z >= 0 && z < Depth) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 } // namespace Voxot

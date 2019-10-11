@@ -2,8 +2,6 @@
 #define _BLOCKSOLID_H_
 
 #include "block.hpp"
-#include "blockbin.hpp"
-#include "voxot.hpp"
 
 using namespace godot;
 
@@ -11,23 +9,33 @@ namespace Voxot {
 
 class BlockSolid : public Block {
 public:
-	bool isVisible() override;
-	bool isSolid() override;
+	bool const isVisible(const Direction &) override;
+	bool const isSolid(const Direction &) override;
 
 	BlockSolid();
 	~BlockSolid();
 
+	void Draw(Chunk *, MeshData *,
+			const int &, const int &, const int &) override;
+
+	const static MetaBlock Block;
+
 protected:
-	void FaceUp(PoolVector3Array *, int, int, int) override;
-	void FaceDown(PoolVector3Array *, int, int, int) override;
-	void FaceNorth(PoolVector3Array *, int, int, int) override;
-	void FaceSouth(PoolVector3Array *, int, int, int) override;
-	void FaceWest(PoolVector3Array *, int, int, int) override;
-	void FaceEast(PoolVector3Array *, int, int, int) override;
+	void FaceUp(MeshData *, const int &, const int &, const int &) override;
+	void FaceDown(MeshData *, const int &, const int &, const int &) override;
+	void FaceNorth(MeshData *, const int &, const int &, const int &) override;
+	void FaceSouth(MeshData *, const int &, const int &, const int &) override;
+	void FaceWest(MeshData *, const int &, const int &, const int &) override;
+	void FaceEast(MeshData *, const int &, const int &, const int &) override;
+	UVTile FaceUV(const Direction &) override;
 
 private:
 	static bool registered;
 };
+
+namespace BlockRegister {
+Registration<BlockSolid> _BlockSolid("solid");
+}
 } // namespace Voxot
 
 #endif
