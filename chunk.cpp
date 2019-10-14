@@ -2,6 +2,11 @@
 
 namespace Voxot {
 
+REGISTER_CLASS(Chunk);
+
+MetaBlock Chunk::AirBlock = { "air", 0 };
+
+Chunk::Chunk(){};
 Chunk::~Chunk() {
 	for (int x = 0; x < Width; x++) {
 		for (int y = 0; y < Height; y++) {
@@ -11,8 +16,6 @@ Chunk::~Chunk() {
 	}
 	delete[] Blocks;
 }
-
-MetaBlock Chunk::AirBlock = { "air", 0 };
 
 String Chunk::toName(const int &x, const int &y, const int &z) {
 	std::string out;
@@ -156,7 +159,7 @@ bool Chunk::DeleteBlock(const int &x, const int &y, const int &z) {
 	if (inBounds(x, y, z)) {
 		if (Blocks[x][y][z] != AirBlock) {
 			dirty();
-			Blocks[x][y][z] = { "air", 0 };
+			Blocks[x][y][z] = AirBlock;
 			return true;
 		}
 	}

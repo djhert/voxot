@@ -6,31 +6,21 @@
 #include "chunk.hpp"
 #include "voxot.hpp"
 
+#include <iostream>
+
 using namespace godot;
 
 namespace Voxot {
 
 class Chunk;
-//class Block;
 
 class World : public Spatial {
-	GODOT_CLASS(World, Spatial);
+	GDNATIVE_CLASS(World, Spatial);
 
 public:
 	String _name;
 
-	World();
-	~World();
-
-	static void _register_methods();
-	void _init();
-	void _ready();
-	void _process(double);
-
-	virtual void Init(){};
-	virtual void Ready(){};
-	virtual void Generate();
-	virtual void Update(const double &){};
+	virtual void Generate(){};
 
 	void setChunkWidth(int);
 	int getChunkWidth();
@@ -54,6 +44,16 @@ public:
 	bool DeleteBlock(const Vector3 &);
 	MetaBlock *GetBock(const Vector3 &);
 
+	template <typename T>
+	static void Register() {
+		register_property<T, int>("Chunk/Width", &T::setChunkWidth, &T::getChunkWidth, 12);
+		register_property<T, int>("Chunk/Height", &T::setChunkHeight, &T::getChunkHeight, 12);
+		register_property<T, int>("Chunk/Depth", &T::setChunkDepth, &T::getChunkDepth, 12);
+
+		register_property<T, Dictionary>("Material/Materials", &T::MaterialList, Dictionary::make<String, Variant>("default", GODOT_VARIANT_TYPE_NIL));
+		register_property<T, int>("Material/Tiles", &T::settilesize, &T::gettilesize, 2);
+	};
+
 protected:
 	int ChunkWidth;
 	int ChunkHeight;
@@ -68,6 +68,7 @@ protected:
 
 	void LoadMaterials();
 };
+
 } // namespace Voxot
 
 #endif

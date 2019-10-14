@@ -33,9 +33,6 @@ private:
 	static bool registered;
 };
 
-namespace BlockRegister {
-Registration<BlockSolid> _BlockSolid("solid");
-}
 } // namespace Voxot
 
 #endif

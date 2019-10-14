@@ -5,6 +5,9 @@
 #include <cmath>
 #include <string>
 
+#include <gdutil/gdnativedef.hpp>
+#include <gdutil/gdnregistry.hpp>
+
 #include <ArrayMesh.hpp>
 #include <CollisionShape.hpp>
 #include <ConcavePolygonShape.hpp>
@@ -35,7 +38,5 @@ struct UVTile {
 	int X;
 	int Y;
 };
-
-void RegisterVoxot();
 } // namespace Voxot
 #endif

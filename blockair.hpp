@@ -12,9 +12,6 @@ public:
 	const static MetaBlock Block;
 };
 
-namespace BlockRegister {
-Registration<BlockAir> _BlockAir("air");
-}
 } // namespace Voxot
 
 #endif

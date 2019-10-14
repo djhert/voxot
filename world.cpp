@@ -2,6 +2,8 @@
 
 namespace Voxot {
 
+REGISTER_CLASS(World);
+
 float World::tileSize;
 
 World::World() {}
@@ -11,15 +13,8 @@ World::~World() {
 }
 
 void World::_register_methods() {
-	register_property<World, int>("Chunk/Width", &World::setChunkWidth, &World::getChunkWidth, 12);
-	register_property<World, int>("Chunk/Height", &World::setChunkHeight, &World::getChunkHeight, 12);
-	register_property<World, int>("Chunk/Depth", &World::setChunkDepth, &World::getChunkDepth, 12);
-
-	register_property<World, Dictionary>("Material/Materials", &World::MaterialList, Dictionary::make<String, Variant>("default", GODOT_VARIANT_TYPE_NIL));
-	register_property<World, int>("Material/Tiles", &World::settilesize, &World::gettilesize, 2);
-
-	register_method("_ready", &World::_ready);
-	register_method("_process", &World::_process);
+	GDNATIVE_REGISTER(World)
+	World::Register<World>();
 }
 
 void World::_init() {
@@ -49,13 +44,6 @@ Ref<SpatialMaterial> World::GetMaterial(String name) {
 		return nullptr;
 	}
 	return MaterialList[name];
-}
-
-void World::Generate() {
-	this->add_child(Chunk::New<Chunk>(this, 0, 0, 0));
-	this->add_child(Chunk::New<Chunk>(this, ChunkWidth, 0, 0));
-	this->add_child(Chunk::New<Chunk>(this, 0, 0, ChunkDepth));
-	this->add_child(Chunk::New<Chunk>(this, ChunkWidth, 0, ChunkDepth));
 }
 
 void World::_process(double delta) {

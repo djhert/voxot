@@ -2,6 +2,10 @@
 
 namespace Voxot {
 
+namespace BlockRegister {
+Registration<BlockSolid> _BlockSolid("solid");
+}
+
 const MetaBlock BlockSolid::Block = { "solid", 0 };
 
 BlockSolid::BlockSolid() {

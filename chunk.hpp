@@ -17,27 +17,12 @@ class World;
 class MeshData;
 
 class Chunk : public MeshInstance {
-	GODOT_CLASS(Chunk, MeshInstance);
+	GDNATIVE_CLASS(Chunk, MeshInstance)
 
 public:
-	// Constructor
-	Chunk(){};
-	// Destroyer
-	~Chunk();
-
 	// Name of chunk
 	String _name;
 
-	// Godot requirements
-	static void _register_methods();
-	void _init();
-	void _ready();
-	void _process(double);
-
-	// Chunk functions
-	virtual void Init(){};
-	virtual void Ready(){};
-	virtual void Update(const double &){};
 	virtual void Generate();
 
 	static void Render(Chunk *);
@@ -63,8 +48,6 @@ public:
 	int Height;
 	int Depth;
 
-	static MetaBlock AirBlock;
-
 protected:
 	MetaBlock ***Blocks;
 
@@ -73,9 +56,12 @@ protected:
 
 	bool inBounds(const int &, const int &, const int &);
 
+	static MetaBlock AirBlock;
+
 	World *_world;
 	StaticBody *staticBody;
 	CollisionShape *collisionShape;
 };
+
 } // namespace Voxot
 #endif
