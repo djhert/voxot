@@ -6,8 +6,6 @@
 #include "chunk.hpp"
 #include "voxot.hpp"
 
-#include <iostream>
-
 using namespace godot;
 
 namespace Voxot {
@@ -34,7 +32,7 @@ public:
 	void settilesize(int);
 	int gettilesize();
 
-	Ref<SpatialMaterial> GetMaterial(String);
+	Chunk *_NewChunk(const String &);
 
 	static float tileSize;
 
@@ -50,7 +48,8 @@ public:
 		register_property<T, int>("Chunk/Height", &T::setChunkHeight, &T::getChunkHeight, 12);
 		register_property<T, int>("Chunk/Depth", &T::setChunkDepth, &T::getChunkDepth, 12);
 
-		register_property<T, Dictionary>("Material/Materials", &T::MaterialList, Dictionary::make<String, Variant>("default", GODOT_VARIANT_TYPE_NIL));
+		register_property<T, Dictionary>("Chunk/Types", &T::Chunklist, Dictionary::make<String, Variant>("default", GODOT_VARIANT_TYPE_NIL));
+
 		register_property<T, int>("Material/Tiles", &T::settilesize, &T::gettilesize, 2);
 	};
 
@@ -64,9 +63,7 @@ protected:
 
 	int tiles;
 
-	Dictionary MaterialList;
-
-	void LoadMaterials();
+	Dictionary Chunklist;
 };
 
 } // namespace Voxot

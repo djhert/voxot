@@ -4,6 +4,7 @@
 #include <atomic>
 #include <cmath>
 #include <string>
+#include <thread>
 
 #include <gdutil/gdnativedef.hpp>
 #include <gdutil/gdnregistry.hpp>
@@ -15,6 +16,7 @@
 #include <Godot.hpp>
 #include <Mesh.hpp>
 #include <MeshInstance.hpp>
+#include <Node.hpp>
 #include <PackedScene.hpp>
 #include <PoolArrays.hpp>
 #include <Resource.hpp>

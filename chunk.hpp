@@ -25,12 +25,14 @@ public:
 
 	virtual void Generate();
 
-	static void Render(Chunk *);
+	void Render();
+	void GenMesh();
 	static String toName(const int &, const int &, const int &);
 
 	void setup(World *, const int &, const int &, const int &);
 	Block *GetBlock(const int &, const int &, const int &);
 	bool DeleteBlock(const int &, const int &, const int &);
+	bool SetBlock(const MetaBlock &, const int &, const int &, const int &);
 	void dirty() { isDirty = true; };
 
 	template <typename T>
@@ -52,7 +54,8 @@ protected:
 	MetaBlock ***Blocks;
 
 	bool isDirty;
-	std::atomic<bool> isUpdating;
+	bool isGenerating;
+	bool doneGenerating;
 
 	bool inBounds(const int &, const int &, const int &);
 
@@ -61,6 +64,13 @@ protected:
 	World *_world;
 	StaticBody *staticBody;
 	CollisionShape *collisionShape;
+
+	Ref<SpatialMaterial> GetMaterial(const String &);
+	Dictionary MaterialList;
+
+	Array _meshArray;
+	ArrayMesh *_mesh;
+	ConcavePolygonShape *_collisionMesh;
 };
 
 } // namespace Voxot

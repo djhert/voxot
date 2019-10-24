@@ -1,5 +1,9 @@
 # Voxot Changelog
 
+## [0.3.0] - 10/24/2019
+### Changes
+ - Chunk Mesh generation is now done on a seperate thread.
+
 ## [0.2.0] - 10/11/2019
 ### Changes
 - Block is now a single file containing a definition

@@ -8,9 +8,7 @@ float World::tileSize;
 
 World::World() {}
 
-World::~World() {
-	MaterialList.clear();
-}
+World::~World() {}
 
 void World::_register_methods() {
 	GDNATIVE_REGISTER(World)
@@ -23,7 +21,7 @@ void World::_init() {
 	ChunkDepth = 12;
 	tiles = 2;
 
-	MaterialList = Dictionary::make<String, Variant>("default", GODOT_VARIANT_TYPE_NIL);
+	Chunklist = Dictionary::make<String, Variant>("default", GODOT_VARIANT_TYPE_NIL);
 
 	BlockBin::instance().Init();
 
@@ -36,14 +34,15 @@ void World::_ready() {
 	Ready();
 }
 
-Ref<SpatialMaterial> World::GetMaterial(String name) {
-	if (!MaterialList.has(name)) {
+Chunk *World::_NewChunk(const String &name) {
+	if (!Chunklist.has(name)) {
 #ifdef DEBUG
-		Godot::print("Unable to find material " + name);
+		Godot::print("Unable to find chunk " + name);
 #endif
 		return nullptr;
 	}
-	return MaterialList[name];
+	Ref<PackedScene> c = Chunklist[name];
+	return Node::cast_to<Chunk>(c->instance());
 }
 
 void World::_process(double delta) {
