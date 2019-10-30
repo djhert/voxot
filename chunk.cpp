@@ -8,12 +8,6 @@ MetaBlock Chunk::AirBlock = { "air", 0 };
 
 Chunk::Chunk(){};
 Chunk::~Chunk() {
-	for (int x = 0; x < Width; x++) {
-		for (int y = 0; y < Height; y++) {
-			delete[] Blocks[x][y];
-		}
-		delete[] Blocks[x];
-	}
 	delete[] Blocks;
 	MaterialList.clear();
 }
@@ -96,13 +90,7 @@ void Chunk::setup(World *w, const int &posx, const int &posy, const int &posz) {
 	staticBody->set_name(get_name());
 	collisionShape->set_name(get_name());
 
-	Blocks = new MetaBlock **[Width];
-	for (int x = 0; x < Width; x++) {
-		Blocks[x] = new MetaBlock *[Height];
-		for (int y = 0; y < Height; y++) {
-			Blocks[x][y] = new MetaBlock[Depth];
-		}
-	}
+	Blocks = new MetaBlock[Width * Height * Depth];
 
 	Generate();
 	dirty();
@@ -130,33 +118,32 @@ void Chunk::Generate() {
 	for (int x = 0; x < Width; x++) {
 		for (int y = 0; y < Height; y++) {
 			for (int z = 0; z < Depth; z++) {
-				Blocks[x][y][z] = { "solid", 0 };
+				Blocks[x + y * Width + z * Width * Depth] = { "solid", 0 };
 			}
 		}
 	}
 }
 
 void Chunk::GenMesh() {
-	MeshData *data = new MeshData();
+	MeshData data = MeshData();
 	_meshArray.clear();
 	_collisionMesh = ConcavePolygonShape::_new();
 
 	for (int x = 0; x < Width; x++) {
 		for (int y = 0; y < Height; y++) {
 			for (int z = 0; z < Depth; z++) {
-				BlockBin::instance().Get(Blocks[x][y][z].name.c_str())->Draw(this, data, x, y, z);
+				BlockBin::instance().Get(Blocks[x + y * Width + z * Width * Depth].name.c_str())->Draw(this, &data, x, y, z);
 			}
 		}
 	}
 
 	_meshArray.resize(ArrayMesh::ARRAY_MAX);
-	_meshArray[ArrayMesh::ARRAY_VERTEX] = data->verts;
-	_meshArray[ArrayMesh::ARRAY_TEX_UV] = data->uvs;
-	_meshArray[ArrayMesh::ARRAY_NORMAL] = data->normals;
-	_meshArray[ArrayMesh::ARRAY_TANGENT] = data->tangents;
+	_meshArray[ArrayMesh::ARRAY_VERTEX] = data.verts;
+	_meshArray[ArrayMesh::ARRAY_TEX_UV] = data.uvs;
+	_meshArray[ArrayMesh::ARRAY_NORMAL] = data.normals;
+	_meshArray[ArrayMesh::ARRAY_TANGENT] = data.tangents;
 
-	_collisionMesh->set_faces(data->verts);
-	delete (data);
+	_collisionMesh->set_faces(data.verts);
 	doneGenerating = true;
 }
 
@@ -179,7 +166,7 @@ void Chunk::Render() {
 
 Block *Chunk::GetBlock(const int &x, const int &y, const int &z) {
 	if (inBounds(x, y, z))
-		return BlockBin::instance().Get(Blocks[x][y][z].name.c_str());
+		return BlockBin::instance().Get(Blocks[x + y * Width + z * Width * Depth].name.c_str());
 	else
 		return BlockBin::instance().Get("air");
 }
@@ -193,10 +180,10 @@ bool Chunk::SetBlock(const MetaBlock &block, const int &x, const int &y, const i
 		return false;
 
 	if (inBounds(x, y, z)) {
-		if (Blocks[x][y][z] == block)
+		if (Blocks[x + y * Width + z * Width * Depth] == block)
 			return false;
 
-		Blocks[x][y][z] = block;
+		Blocks[x + y * Width + z * Width * Depth] = block;
 		dirty();
 		return true;
 	}

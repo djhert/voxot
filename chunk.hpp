@@ -51,7 +51,7 @@ public:
 	int Depth;
 
 protected:
-	MetaBlock ***Blocks;
+	MetaBlock *Blocks;
 
 	bool isDirty;
 	bool isGenerating;
