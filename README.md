@@ -1,13 +1,13 @@
 # Voxot
 
-## Adding to your project
+This is a work in progress, and is not intended for production usage yet.
 
-### Notice
-This is intended to be used with godot-init-project.
+### Including in a project
 
-Include this project as a submodule of your Godot project.
+__NOTE:__ This is meant to be used with another project that includes build scripts for GDNative Development: [gdnative-project](https://github.com/hlfstr/gdnative-project)
+
+Include this project as a submodule of your base directory.  Ensure that it is stored in the `source/include` directory so it is compiled with your source.
+
 ```sh
-$ git submodule add https://github.com/hlfstr/voxot source/voxot
+$ git submodule add https://github.com/hlfstr/voxot source/include/voxot
 ```
-
-The source can be built and added as GDNative library.  See the godot-init-project for instructions on how to build.
