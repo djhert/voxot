@@ -1,5 +1,8 @@
 # Voxot Changelog
 
+## [0.0.4] - 12/02/2020
+- Fix all compilation errors
+
 ## [0.0.3] - 12/02/2020
 - Restructure files
 - Add FlatBuffer support via gdflatbuffers

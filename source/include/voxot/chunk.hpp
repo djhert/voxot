@@ -10,8 +10,7 @@
 #include <gdregistry.hpp>
 
 #include "flatbuffers/flatbuffers.h"
-#include "voxot/fbs/chunk_generated.h"
-#include "voxot/fbs/fbsutil.hpp"
+#include "voxot/fb/chunk_generated.h"
 
 using namespace godot;
 
