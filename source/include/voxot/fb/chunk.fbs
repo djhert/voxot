@@ -1,0 +1,16 @@
+// Flatbuffer type for chunk
+
+namespace voxot;
+
+struct Vec3 {
+    x:float;
+    y:float;
+    z:float;
+}
+
+table fbChunk {
+  //  pos::Vec3;
+    name:string;
+}
+
+root_type fbChunk;
